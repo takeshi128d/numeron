@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NUMER0N ONLINE</title>
+    <title>NUMER0N: ILLEGAL ULTIMATE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Firebase SDK (v8 互換モード) -->
@@ -11,10 +11,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap');
 
         body {
-            background-color: #000000;
+            background-color: #050505;
             color: #00ff41;
             font-family: 'Share Tech Mono', 'Zen Kaku Gothic New', monospace;
             overflow: hidden;
@@ -22,221 +22,305 @@
             user-select: none;
         }
 
-        /* サイバーパンクな背景 */
+        /* 背景アニメーション */
         .bg-cyber {
-            background-image: 
-                linear-gradient(rgba(0, 20, 0, 0.9), rgba(0, 10, 0, 0.95)),
+            background: 
+                linear-gradient(rgba(0, 10, 0, 0.9), rgba(0, 5, 0, 0.95)),
                 repeating-linear-gradient(0deg, transparent, transparent 1px, #003300 1px, #003300 2px);
             background-size: 100% 100%, 100% 4px;
+            animation: scanline 10s linear infinite;
+        }
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
         }
 
         /* ネオンボタン */
         .btn-neon {
             border: 1px solid #00ff41;
             color: #00ff41;
-            background: rgba(0, 255, 65, 0.1);
-            transition: all 0.2s;
+            background: rgba(0, 255, 65, 0.05);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-shadow: 0 0 5px #00ff41;
-            box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+            position: relative;
+            overflow: hidden;
         }
         .btn-neon:hover:not(:disabled) {
             background: #00ff41;
             color: #000;
-            box-shadow: 0 0 20px #00ff41;
+            box-shadow: 0 0 25px #00ff41;
+            transform: translateY(-2px);
         }
         .btn-neon:active:not(:disabled) {
             transform: scale(0.95);
         }
         .btn-neon:disabled {
             border-color: #333;
-            color: #333;
+            color: #444;
             background: transparent;
             text-shadow: none;
             box-shadow: none;
+            cursor: not-allowed;
         }
 
-        /* 入力ディスプレイ */
+        /* 金色ボタン（ショップ用） */
+        .btn-gold {
+            border: 1px solid #ffd700;
+            color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            text-shadow: 0 0 5px #ffd700;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        }
+        .btn-gold:hover:not(:disabled) {
+            background: #ffd700;
+            color: #000;
+            box-shadow: 0 0 20px #ffd700;
+        }
+        .btn-gold:disabled {
+            border-color: #443300;
+            color: #443300;
+            background: transparent;
+            box-shadow: none;
+        }
+
         .display-box {
             background: #001100;
             border: 1px solid #004400;
-            box-shadow: inset 0 0 10px #002200;
+            box-shadow: inset 0 0 15px #002200;
             text-shadow: 0 0 10px #00ff41;
         }
 
-        /* 履歴テーブル */
-        .history-row {
-            border-bottom: 1px solid #003300;
-        }
-        .history-row:last-child {
-            border-bottom: none;
-        }
-
-        /* グリッチエフェクト風テキスト */
-        .glitch-text {
-            position: relative;
+        .glitch-text { position: relative; animation: glitch 3s infinite; }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            2% { transform: translate(-2px, 2px); }
+            4% { transform: translate(2px, -2px); }
+            6% { transform: translate(0); }
+            100% { transform: translate(0); }
         }
         
-        /* オーバーレイ */
         #overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 50;
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.92); z-index: 50;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
         }
         
         input { 
-            background: #001100; 
-            border: 1px solid #00ff41; 
-            color: #00ff41; 
-            padding: 10px; 
-            text-align: center; 
-            font-family: 'Share Tech Mono';
-            outline: none;
+            background: #001100; border: 1px solid #00ff41; color: #00ff41; 
+            padding: 12px; text-align: center; font-family: 'Share Tech Mono'; outline: none;
+            transition: box-shadow 0.3s;
         }
-        input::placeholder { color: #004400; }
+        input:focus { box-shadow: 0 0 15px #00ff41; }
         
-        /* スクロールバー */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #001100; }
-        ::-webkit-scrollbar-thumb { background: #004400; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #003300; }
+
+        .log-item { color: #ffd700; border-left: 2px solid #ffd700; padding-left: 4px; font-size: 0.7rem; margin-bottom: 2px; background: rgba(255, 215, 0, 0.05); }
     </style>
 </head>
 <body class="h-screen w-full flex flex-col bg-cyber">
 
-    <!-- オーバーレイ群 -->
+    <!-- オーバーレイ -->
     <div id="overlay">
-        <h1 class="text-5xl font-bold mb-2 tracking-widest glitch-text" style="text-shadow: 2px 2px #003300;">NUMER0N</h1>
-        <p class="text-xs mb-8 tracking-[0.5em] opacity-70">ONLINE TACTICAL GAME</p>
+        <h1 class="text-6xl font-black mb-1 tracking-widest glitch-text" style="text-shadow: 4px 4px #003300;">NUMER0N</h1>
+        <p class="text-xs mb-10 tracking-[0.8em] text-yellow-500 font-bold">ILLEGAL EDITION</p>
         
-        <!-- ロビー画面 -->
-        <div id="screen-lobby" class="text-center w-full max-w-sm px-4">
+        <!-- モード選択 -->
+        <div id="screen-mode" class="text-center w-full max-w-sm px-4 flex flex-col gap-4">
+            <button onclick="selectMode('cpu')" class="btn-neon w-full py-6 text-xl font-bold tracking-widest relative group">
+                <span class="absolute inset-0 bg-green-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+                VS CPU
+                <div class="text-[10px] opacity-70 font-normal mt-1 tracking-normal">ソロプレイで練習</div>
+            </button>
+            <button onclick="selectMode('online')" class="btn-neon w-full py-6 text-xl font-bold tracking-widest relative group">
+                <span class="absolute inset-0 bg-green-500/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></span>
+                ONLINE BATTLE
+                <div class="text-[10px] opacity-70 font-normal mt-1 tracking-normal">合言葉で対戦</div>
+            </button>
+        </div>
+
+        <!-- ロビー画面 (Online) -->
+        <div id="screen-lobby" class="text-center w-full max-w-sm px-4 hidden">
             <div class="mb-6">
-                <p class="mb-2 text-sm opacity-80">ACCESS CODE (ROOM ID)</p>
-                <input type="text" id="room-id-input" placeholder="ROOM123" class="w-full mb-4 text-xl uppercase tracking-widest">
+                <p class="mb-2 text-sm opacity-80 text-yellow-400">ACCESS CODE (ROOM ID)</p>
+                <input type="text" id="room-id-input" placeholder="ROOM123" class="w-full mb-4 text-2xl uppercase tracking-widest rounded">
             </div>
             
-            <div id="firebase-warning" class="hidden text-red-500 text-xs mb-4 border border-red-900 p-2">
+            <div id="firebase-warning" class="hidden text-red-500 text-xs mb-4 border border-red-900 p-2 bg-red-900/10">
                 ⚠️ DATABASE ERROR: Please check Firestore settings.
             </div>
 
-            <button onclick="tryJoinRoom()" id="btn-join" class="btn-neon w-full py-4 font-bold tracking-widest">
-                CONNECT
-            </button>
+            <div class="flex gap-4">
+                <button onclick="showScreen('mode')" class="btn-neon flex-1 py-4 text-xs">BACK</button>
+                <button onclick="tryJoinRoom()" id="btn-join" class="btn-neon flex-[2] py-4 font-bold tracking-widest">CONNECT</button>
+            </div>
         </div>
 
         <!-- 数字設定画面 -->
         <div id="screen-setup" class="text-center hidden w-full max-w-sm px-4">
-            <h2 class="text-2xl mb-4 text-white">SET YOUR NUMBER</h2>
-            <p class="text-xs mb-4 text-green-400">3桁の数字を決めてください (重複なし)</p>
+            <h2 class="text-3xl mb-2 text-white font-bold">SET NUMBER</h2>
+            <p class="text-xs mb-6 text-green-400 opacity-80">3桁の数字を決めてください (重複なし)</p>
             
-            <div class="display-box text-4xl py-4 mb-6 tracking-[0.5em] h-20 flex items-center justify-center" id="setup-display">
+            <div class="display-box text-5xl py-6 mb-6 tracking-[0.5em] h-24 flex items-center justify-center font-bold" id="setup-display">
                 ---
             </div>
             
-            <!-- テンキー (セットアップ用) -->
-            <div class="grid grid-cols-5 gap-2 mb-4 max-w-xs mx-auto">
-                <button class="btn-neon py-3" onclick="inputSetup(0)">0</button>
-                <button class="btn-neon py-3" onclick="inputSetup(1)">1</button>
-                <button class="btn-neon py-3" onclick="inputSetup(2)">2</button>
-                <button class="btn-neon py-3" onclick="inputSetup(3)">3</button>
-                <button class="btn-neon py-3" onclick="inputSetup(4)">4</button>
-                <button class="btn-neon py-3" onclick="inputSetup(5)">5</button>
-                <button class="btn-neon py-3" onclick="inputSetup(6)">6</button>
-                <button class="btn-neon py-3" onclick="inputSetup(7)">7</button>
-                <button class="btn-neon py-3" onclick="inputSetup(8)">8</button>
-                <button class="btn-neon py-3" onclick="inputSetup(9)">9</button>
+            <!-- テンキー -->
+            <div class="grid grid-cols-5 gap-2 mb-6 max-w-xs mx-auto">
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(0)">0</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(1)">1</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(2)">2</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(3)">3</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(4)">4</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(5)">5</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(6)">6</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(7)">7</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(8)">8</button>
+                <button class="btn-neon py-3 text-lg font-bold" onclick="inputSetup(9)">9</button>
             </div>
-            <div class="flex gap-2 justify-center mb-6">
-                <button class="btn-neon px-6 py-2 text-sm" onclick="clearSetup()">CLR</button>
-                <button class="btn-neon px-6 py-2 text-sm font-bold" onclick="confirmSetup()" id="btn-setup-ok" disabled>OK</button>
+            <div class="flex gap-4 justify-center">
+                <button class="btn-neon px-8 py-3 text-sm" onclick="clearSetup()">CLR</button>
+                <button class="btn-neon px-12 py-3 text-lg font-bold bg-green-900/30" onclick="confirmSetup()" id="btn-setup-ok" disabled>OK</button>
             </div>
         </div>
 
         <!-- 待機画面 -->
         <div id="screen-wait" class="text-center hidden">
-            <div class="animate-pulse text-6xl mb-4">...</div>
-            <h2 class="text-xl mb-2">WAITING FOR OPPONENT</h2>
-            <p class="text-sm opacity-60">相手の準備を待っています</p>
+            <div class="animate-spin text-6xl mb-6 text-yellow-500 font-thin border-4 border-yellow-500 border-t-transparent rounded-full w-20 h-20 mx-auto"></div>
+            <h2 class="text-2xl mb-2 font-bold tracking-widest">WAITING...</h2>
+            <p class="text-sm opacity-60">対戦相手の準備を待っています</p>
         </div>
 
         <!-- 結果画面 -->
-        <div id="screen-result" class="text-center hidden">
-            <h2 id="result-title" class="text-5xl font-bold mb-4">WIN</h2>
-            <p id="result-sub" class="mb-8 text-xl">TARGET DESTROYED</p>
-            <p class="mb-2 text-sm opacity-70">OPPONENT'S NUMBER</p>
-            <div id="result-number" class="text-4xl font-bold text-red-500 mb-8 tracking-widest">---</div>
-            <button onclick="location.reload()" class="btn-neon px-10 py-3 font-bold">
-                DISCONNECT
+        <div id="screen-result" class="text-center hidden w-full max-w-md px-4">
+            <h2 id="result-title" class="text-7xl font-black mb-2 italic transform -skew-x-12" style="text-shadow: 5px 5px 0px rgba(0,0,0,0.5);">WIN</h2>
+            <p id="result-sub" class="mb-8 text-xl tracking-widest">MISSION COMPLETE</p>
+            
+            <div class="bg-[#001100] border border-[#003300] p-6 mb-8 rounded shadow-lg relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50"></div>
+                
+                <p class="text-xs opacity-50 mb-1 tracking-widest">ENEMY NUMBER</p>
+                <div id="result-number" class="text-5xl font-bold text-red-500 mb-6 tracking-[0.3em]">---</div>
+
+                <div class="h-px bg-[#003300] w-full mb-6"></div>
+
+                <p class="text-xs opacity-50 mb-2 tracking-widest text-yellow-500">TOTAL SCORE</p>
+                <div class="flex justify-center items-baseline gap-1">
+                    <span class="text-2xl text-yellow-600">$</span>
+                    <div id="result-credits" class="text-6xl font-bold text-yellow-400 tracking-widest">0</div>
+                </div>
+            </div>
+
+            <button onclick="location.reload()" class="btn-neon w-full py-4 text-xl font-bold bg-gray-900">
+                RETURN TO TITLE
             </button>
         </div>
     </div>
 
     <!-- メインゲーム画面 -->
-    <div id="game-ui" class="flex-1 flex flex-col max-w-md mx-auto w-full relative h-full">
+    <div id="game-ui" class="flex-1 flex flex-col max-w-md mx-auto w-full relative h-full hidden shadow-2xl">
         
         <!-- ヘッダー情報 -->
-        <div class="h-16 border-b border-[#003300] flex justify-between items-center px-4 bg-[#001100]">
+        <div class="h-20 border-b-2 border-[#003300] flex justify-between items-center px-4 bg-[#000a00]">
             <div>
-                <div class="text-[10px] opacity-50">MY NUMBER</div>
-                <div class="text-xl font-bold tracking-widest text-green-300" id="my-number-disp">***</div>
+                <div class="text-[9px] opacity-50 tracking-widest">MY NUMBER</div>
+                <div class="text-2xl font-bold tracking-[0.2em] text-green-400" id="my-number-disp">***</div>
             </div>
-            <div class="text-center">
-                <div class="text-[10px] opacity-50">ROOM</div>
-                <div class="text-xs" id="disp-room-id">---</div>
+            <div class="text-center flex flex-col items-center bg-[#001800] px-6 py-1 rounded border border-[#003300]">
+                <div class="text-[9px] opacity-60 text-yellow-500 tracking-widest">CREDITS</div>
+                <div class="text-2xl font-bold text-yellow-400" id="my-money-disp">$3000</div>
             </div>
             <div class="text-right">
-                <div class="text-[10px] opacity-50">TURN</div>
-                <div class="text-sm font-bold text-yellow-400" id="turn-indicator">WAITING</div>
+                <div class="text-[9px] opacity-50 tracking-widest">TURN</div>
+                <div class="text-lg font-bold text-white px-2 py-0.5 rounded" id="turn-indicator">--</div>
             </div>
         </div>
 
         <!-- メインエリア -->
-        <div class="flex-1 flex flex-col relative overflow-hidden">
+        <div class="flex-1 flex flex-col relative overflow-hidden bg-black/80">
             
-            <!-- 履歴エリア (スクロール) -->
+            <!-- 履歴エリア -->
             <div class="flex-1 overflow-y-auto p-2 flex gap-2 text-xs">
                 <!-- 自分の履歴 -->
-                <div class="flex-1 border border-[#003300] bg-[#000500]">
-                    <div class="p-1 text-center bg-[#002200] border-b border-[#003300] text-gray-400">YOUR ATTACK</div>
-                    <div id="my-history" class="p-1">
-                        <!-- JSで追加 -->
-                    </div>
+                <div class="flex-1 border border-[#003300] bg-[#000500]/80 flex flex-col rounded">
+                    <div class="p-2 text-center bg-[#001800] border-b border-[#003300] text-green-600 font-bold tracking-widest">YOU</div>
+                    <div id="my-history" class="p-1 flex-1 overflow-y-auto scroll-smooth"></div>
                 </div>
                 <!-- 相手の履歴 -->
-                <div class="flex-1 border border-[#003300] bg-[#000500]">
-                    <div class="p-1 text-center bg-[#002200] border-b border-[#003300] text-red-900">ENEMY ATTACK</div>
-                    <div id="enemy-history" class="p-1">
-                        <!-- JSで追加 -->
-                    </div>
+                <div class="flex-1 border border-[#003300] bg-[#000500]/80 flex flex-col rounded">
+                    <div class="p-2 text-center bg-[#001800] border-b border-[#003300] text-red-600 font-bold tracking-widest">ENEMY</div>
+                    <div id="enemy-history" class="p-1 flex-1 overflow-y-auto scroll-smooth"></div>
                 </div>
             </div>
 
-            <!-- 入力エリア -->
-            <div class="h-auto bg-[#000800] border-t border-[#003300] p-4 pb-8">
-                
-                <!-- コール表示 -->
-                <div class="flex justify-center mb-4">
-                    <div class="display-box w-full max-w-[200px] h-14 flex items-center justify-center text-4xl tracking-[0.5em]" id="call-display">
-                        
+            <!-- ショップパネル -->
+            <div id="shop-panel" class="hidden absolute bottom-[300px] left-2 right-2 bg-[#0a0a00] border border-yellow-600 p-4 z-20 rounded shadow-[0_0_50px_rgba(255,200,0,0.2)]">
+                <div class="flex justify-between items-center mb-4 border-b border-yellow-900 pb-2">
+                    <h3 class="text-yellow-500 font-bold tracking-widest text-lg">ILLEGAL SHOP</h3>
+                    <div class="text-[10px] text-gray-400">使用制限: 相手の使用数+1まで</div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button onclick="buyItem('highlow')" class="btn-gold p-3 flex flex-col items-center rounded" id="btn-item-hl">
+                        <span class="font-bold text-sm tracking-widest mb-1">HIGH&LOW</span>
+                        <span class="text-xs opacity-80">$800</span>
+                    </button>
+                    <button onclick="buyItem('target')" class="btn-gold p-3 flex flex-col items-center rounded" id="btn-item-target">
+                        <span class="font-bold text-sm tracking-widest mb-1">TARGET</span>
+                        <span class="text-xs opacity-80">$1000</span>
+                    </button>
+                    <button onclick="buyItem('double')" class="btn-gold p-3 flex flex-col items-center rounded" id="btn-item-double">
+                        <span class="font-bold text-sm tracking-widest mb-1">DOUBLE</span>
+                        <span class="text-xs opacity-80">$1500</span>
+                    </button>
+                </div>
+                <div class="mt-3 text-center">
+                    <p class="text-[10px] text-red-400" id="shop-msg">※アイテム使用でターン終了</p>
+                    <div class="text-[10px] text-gray-500 mt-1">
+                        使用数: 自分 <span id="my-item-count" class="text-white font-bold">0</span> / 相手 <span id="enemy-item-count" class="text-white font-bold">0</span>
                     </div>
                 </div>
+                <button onclick="toggleShop()" class="absolute -top-3 -right-3 bg-red-900 text-white rounded-full w-6 h-6 text-xs border border-red-500">✕</button>
+            </div>
 
-                <!-- テンキー (ゲーム用) -->
-                <div class="grid grid-cols-5 gap-2 max-w-sm mx-auto mb-4">
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(0)">0</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(1)">1</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(2)">2</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(3)">3</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(4)">4</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(5)">5</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(6)">6</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(7)">7</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(8)">8</button>
-                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(9)">9</button>
+            <!-- アクションエリア -->
+            <div class="h-auto bg-[#000a00] border-t border-[#003300] p-4 pb-8 relative shadow-[0_-5px_20px_rgba(0,50,0,0.3)] z-10">
+                
+                <!-- ショップボタン -->
+                <button onclick="toggleShop()" class="absolute -top-10 right-4 bg-yellow-900/80 border border-yellow-500 text-yellow-400 text-xs px-4 py-2 rounded-t font-bold tracking-widest hover:bg-yellow-800 transition">
+                    ITEM SHOP ▼
+                </button>
+                
+                <div id="double-mode-indicator" class="hidden absolute -top-8 left-4 text-red-500 font-bold text-xs bg-red-900/20 px-2 py-1 border border-red-500 animate-pulse">
+                    DOUBLE ATTACK ACTIVE
+                </div>
+
+                <!-- コール表示 -->
+                <div class="flex justify-center mb-4">
+                    <div class="display-box w-full max-w-[240px] h-16 flex items-center justify-center text-5xl tracking-[0.5em] font-bold" id="call-display"></div>
+                </div>
+
+                <!-- テンキー -->
+                <div class="grid grid-cols-5 gap-3 max-w-sm mx-auto mb-5">
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(0)">0</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(1)">1</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(2)">2</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(3)">3</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(4)">4</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(5)">5</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(6)">6</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(7)">7</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(8)">8</button>
+                    <button class="btn-neon py-3 text-xl font-bold rounded" onclick="inputCall(9)">9</button>
                 </div>
 
                 <!-- アクションボタン -->
                 <div class="flex gap-4 justify-center max-w-sm mx-auto">
-                    <button class="btn-neon flex-1 py-3 text-sm" onclick="clearCall()">CLEAR</button>
-                    <button class="btn-neon flex-[2] py-3 text-xl font-bold" id="btn-call" onclick="submitCall()" disabled>CALL</button>
+                    <button class="btn-neon flex-1 py-4 text-sm font-bold bg-red-900/10 border-red-900/50 text-red-500" onclick="clearCall()">CLR</button>
+                    <button class="btn-neon flex-[2] py-4 text-2xl font-black tracking-widest bg-green-900/20" id="btn-call" onclick="submitCall()" disabled>
+                        CALL
+                    </button>
                 </div>
             </div>
         </div>
@@ -244,7 +328,8 @@
 
 <script>
 /**
- * FIREBASE CONFIGURATION
+ * FIREBASE CONFIGURATION (Placeholder)
+ * 本番環境では正しいキーを入れてください
  */
 const firebaseConfig = {
   apiKey: "AIzaSyBTpDao1xXCJt5XM1-qv3QsNw8HOPy-bUw",
@@ -255,108 +340,100 @@ const firebaseConfig = {
   appId: "1:752649306956:web:76706e04aa93ccd5c145e9"
 };
 
-// グローバル変数
+// --- グローバル変数 ---
 let db;
-let myPlayerId = null; // 1 or 2
+let currentMode = 'online'; // 'online' or 'cpu'
+let myPlayerId = 1; 
 let currentRoomId = null;
 let unsubscribe = null;
+
+// ローカル状態
 let mySecretNumber = "";
 let currentInput = "";
 let setupInput = "";
 
-// ゲーム状態
+// CPU対戦用メモリ
+let cpuSecret = "";
+let cpuCandidates = []; // 012-987の全候補
+let cpuMoney = 3000;
+let cpuItemCount = 0;
+let cpuDoubleActive = 0;
+
+// ゲーム状態 (DB同期 / CPUローカル共通構造)
 let gameState = {
-    status: 'waiting', // waiting, setup, playing, finished
+    status: 'waiting', 
     turn: 1,
-    p1Num: null,
-    p2Num: null,
-    history: [], // { player: 1, call: "123", eat: 0, bite: 1 }
+    p1Num: null, p2Num: null,
+    p1Money: 3000, p2Money: 3000,
+    p1ItemCount: 0, p2ItemCount: 0,
+    p1Double: 0, p2Double: 0, // 0:なし, 1:次ターン2回行動権あり, 2:現在2回行動中
+    history: [], 
     winner: null
 };
 
-// 初期化
+// --- 初期化 ---
 function initApp() {
     try {
         firebase.initializeApp(firebaseConfig);
         db = firebase.firestore();
-        console.log("Firebase Initialized");
     } catch (e) {
         console.error(e);
         document.getElementById('firebase-warning').classList.remove('hidden');
     }
 }
 
-// 画面遷移
-function showScreen(id) {
-    ['screen-lobby', 'screen-setup', 'screen-wait', 'screen-result'].forEach(s => {
-        document.getElementById(s).classList.add('hidden');
-    });
-    const target = document.getElementById('screen-' + id);
-    if(target) target.classList.remove('hidden');
-    
-    const overlay = document.getElementById('overlay');
-    if (id === 'none') {
-        overlay.style.display = 'none';
+function selectMode(mode) {
+    currentMode = mode;
+    if (mode === 'cpu') {
+        startCpuGame();
     } else {
-        overlay.style.display = 'flex';
+        showScreen('lobby');
     }
 }
 
-// マッチング
+function showScreen(id) {
+    ['screen-mode', 'screen-lobby', 'screen-setup', 'screen-wait', 'screen-result'].forEach(s => {
+        document.getElementById(s).classList.add('hidden');
+    });
+    document.getElementById('game-ui').classList.add('hidden');
+
+    if (id === 'game') {
+        document.getElementById('game-ui').classList.remove('hidden');
+        document.getElementById('overlay').style.display = 'none';
+    } else {
+        const target = document.getElementById('screen-' + id);
+        if(target) target.classList.remove('hidden');
+        document.getElementById('overlay').style.display = 'flex';
+    }
+}
+
+// --- Online Logic ---
 async function tryJoinRoom() {
     const roomInput = document.getElementById('room-id-input').value.toUpperCase();
-    if (!roomInput) return;
-    if (!db) return;
-    
+    if (!roomInput || !db) return;
     currentRoomId = roomInput;
-    document.getElementById('disp-room-id').innerText = currentRoomId;
-    const btn = document.getElementById('btn-join');
-    btn.disabled = true;
-    btn.innerText = "CONNECTING...";
+    document.getElementById('btn-join').disabled = true;
+    document.getElementById('btn-join').innerText = "CONNECTING...";
 
     const docRef = db.collection('numeron_rooms').doc(currentRoomId);
-
     try {
         await db.runTransaction(async (transaction) => {
             const doc = await transaction.get(docRef);
-
             if (!doc.exists) {
-                // ホスト(P1)
                 myPlayerId = 1;
-                transaction.set(docRef, {
-                    status: 'setup',
-                    turn: 1,
-                    p1Num: null,
-                    p2Num: null,
-                    history: [],
-                    winner: null,
-                    updatedAt: Date.now()
-                });
+                transaction.set(docRef, getInitialState());
             } else {
                 const data = doc.data();
-                if (data.status === 'setup' && !data.p2Num) {
-                    // ゲスト(P2) ※まだ数字未設定の状態なら入れる
-                    myPlayerId = 2;
-                } else if (data.status === 'waiting') {
-                     // まだ誰もいない判定等の細かい制御は省略、簡易的にP2とする
-                     myPlayerId = 2;
-                } else {
-                    // 既に埋まっている場合も簡易的にP2として入る（再接続考慮）
-                    // 本格的にはメンバー管理が必要だが今回は簡易版
-                    myPlayerId = 2;
-                }
+                if (data.status === 'setup' || data.status === 'waiting') myPlayerId = 2;
+                else myPlayerId = 2; // 簡易
             }
         });
-
-        // 数字設定画面へ
         showScreen('setup');
         startListening();
-
     } catch (error) {
-        console.error(error);
-        alert("接続エラー");
-        btn.disabled = false;
-        btn.innerText = "CONNECT";
+        alert("Error: " + error);
+        document.getElementById('btn-join').disabled = false;
+        document.getElementById('btn-join').innerText = "CONNECT";
     }
 }
 
@@ -364,165 +441,295 @@ function startListening() {
     unsubscribe = db.collection('numeron_rooms').doc(currentRoomId)
         .onSnapshot((doc) => {
             if (doc.exists) {
-                const data = doc.data();
-                gameState = data;
+                gameState = doc.data();
                 onGameStateChanged();
             }
         });
 }
 
-// 状態変化時の処理
+function updateRemoteState(updates) {
+    if (currentMode === 'online') {
+        db.collection('numeron_rooms').doc(currentRoomId).update(updates);
+    } else {
+        // CPUモードはローカル変数を更新して画面更新
+        Object.assign(gameState, updates);
+        onGameStateChanged();
+        
+        // CPUのターン処理
+        if (gameState.status === 'playing' && gameState.turn === 2 && !gameState.winner) {
+            setTimeout(cpuTurnProcess, 1500);
+        }
+    }
+}
+
+function getInitialState() {
+    return {
+        status: 'setup',
+        turn: 1,
+        p1Num: null, p2Num: null,
+        p1Money: 3000, p2Money: 3000,
+        p1ItemCount: 0, p2ItemCount: 0,
+        p1Double: 0, p2Double: 0,
+        history: [], winner: null, updatedAt: Date.now()
+    };
+}
+
+// --- Common Logic ---
 function onGameStateChanged() {
     if (gameState.status === 'setup') {
-        // 自分が数字を送信済みなら待機画面
-        if (myPlayerId === 1 && gameState.p1Num) showScreen('wait');
-        else if (myPlayerId === 2 && gameState.p2Num) showScreen('wait');
-        else showScreen('setup');
-
-        // 両者設定完了したらゲーム開始へ
-        if (gameState.p1Num && gameState.p2Num) {
-            if (myPlayerId === 1) {
-                db.collection('numeron_rooms').doc(currentRoomId).update({
-                    status: 'playing'
-                });
-            }
+        if ((myPlayerId === 1 && gameState.p1Num) || (myPlayerId === 2 && gameState.p2Num)) {
+            showScreen('wait');
+        } else {
+            showScreen('setup');
+        }
+        if (gameState.p1Num && gameState.p2Num && myPlayerId === 1 && currentMode === 'online') {
+            updateRemoteState({ status: 'playing' });
         }
     } else if (gameState.status === 'playing') {
-        showScreen('none');
+        showScreen('game');
         updateGameUI();
     } else if (gameState.status === 'finished') {
         showResult();
     }
 }
 
-// 数字設定ロジック
+// Setup
 function inputSetup(num) {
     if (setupInput.length >= 3) return;
-    if (setupInput.includes(num.toString())) return; // 重復なし
+    if (setupInput.includes(num.toString())) return; 
     setupInput += num;
     updateSetupDisplay();
 }
-function clearSetup() {
-    setupInput = "";
-    updateSetupDisplay();
-}
+function clearSetup() { setupInput = ""; updateSetupDisplay(); }
 function updateSetupDisplay() {
-    const disp = document.getElementById('setup-display');
-    disp.innerText = setupInput.padEnd(3, '-');
+    document.getElementById('setup-display').innerText = setupInput.padEnd(3, '-');
     document.getElementById('btn-setup-ok').disabled = setupInput.length !== 3;
 }
-async function confirmSetup() {
+function confirmSetup() {
     mySecretNumber = setupInput;
     document.getElementById('my-number-disp').innerText = mySecretNumber;
     
-    const updateData = {};
-    if (myPlayerId === 1) updateData.p1Num = mySecretNumber;
-    else updateData.p2Num = mySecretNumber;
-    
-    await db.collection('numeron_rooms').doc(currentRoomId).update(updateData);
+    if (currentMode === 'online') {
+        const updateData = {};
+        if (myPlayerId === 1) updateData.p1Num = mySecretNumber;
+        else updateData.p2Num = mySecretNumber;
+        updateRemoteState(updateData);
+    } else {
+        // CPUモード開始
+        gameState.p1Num = mySecretNumber;
+        gameState.p2Num = cpuSecret; // CPUは既に決めている
+        gameState.status = 'playing';
+        updateRemoteState({});
+    }
 }
 
-// ゲームプレイロジック
+// Game Play
 function inputCall(num) {
     if (currentInput.length >= 3) return;
     if (currentInput.includes(num.toString())) return;
     currentInput += num;
     updateCallDisplay();
 }
-function clearCall() {
-    currentInput = "";
-    updateCallDisplay();
-}
+function clearCall() { currentInput = ""; updateCallDisplay(); }
 function updateCallDisplay() {
     document.getElementById('call-display').innerText = currentInput;
     const isMyTurn = gameState.turn === myPlayerId;
     document.getElementById('btn-call').disabled = !(currentInput.length === 3 && isMyTurn);
 }
 
-async function submitCall() {
+function submitCall() {
     if (gameState.turn !== myPlayerId) return;
-
-    // 判定ロジック
     const targetNum = myPlayerId === 1 ? gameState.p2Num : gameState.p1Num;
-    const callNum = currentInput;
-    
-    let eat = 0;
-    let bite = 0;
-
-    for (let i = 0; i < 3; i++) {
-        if (callNum[i] === targetNum[i]) {
-            eat++;
-        } else if (targetNum.includes(callNum[i])) {
-            bite++;
-        }
-    }
-
-    // データ更新
-    const newHistory = [...gameState.history, {
-        player: myPlayerId,
-        call: callNum,
-        eat: eat,
-        bite: bite
-    }];
-    
-    const updates = {
-        history: newHistory,
-        turn: myPlayerId === 1 ? 2 : 1
-    };
-
-    if (eat === 3) {
-        updates.status = 'finished';
-        updates.winner = myPlayerId;
-    }
-
+    processCall(myPlayerId, currentInput, targetNum);
     currentInput = "";
     updateCallDisplay();
-
-    await db.collection('numeron_rooms').doc(currentRoomId).update(updates);
 }
 
-// UI更新
+function processCall(player, callNum, targetNum) {
+    let eat = 0, bite = 0;
+    for (let i = 0; i < 3; i++) {
+        if (callNum[i] === targetNum[i]) eat++;
+        else if (targetNum.includes(callNum[i])) bite++;
+    }
+
+    const newHistory = [...gameState.history, {
+        player: player, type: 'call', call: callNum, eat: eat, bite: bite
+    }];
+    
+    const updates = { history: newHistory };
+    
+    // Double Check
+    const doubleKey = player === 1 ? 'p1Double' : 'p2Double';
+    let doubleState = gameState[doubleKey];
+    
+    if (eat === 3) {
+        updates.status = 'finished';
+        updates.winner = player;
+    } else {
+        // ターン制御
+        if (doubleState === 2) {
+            // ダブル2回目終了 -> ターン交代
+            updates[doubleKey] = 0;
+            updates.turn = player === 1 ? 2 : 1;
+        } else if (doubleState === 1) {
+             // ダブル発動待機中 -> 2回行動開始
+             // しかしアイテム使用でターン消費するため、ここに来るのは
+             // アイテム使用後の次の自分のターンの1手目。
+             // 1手終わったので状態を2(残り1回)にする。
+             // ターンは交代しない。
+             updates[doubleKey] = 2;
+             // turnはそのまま
+        } else {
+            // 通常 -> ターン交代
+            updates.turn = player === 1 ? 2 : 1;
+        }
+    }
+    
+    // Check next player's double status to activate it?
+    // No, logic handled when they play.
+    
+    // If next player has Double=1 (active from item), they start their turn.
+    // Nothing special needed here, just UI indication.
+    
+    updateRemoteState(updates);
+}
+
+// Shop
+function toggleShop() { document.getElementById('shop-panel').classList.toggle('hidden'); }
+
+function buyItem(itemType) {
+    if (gameState.turn !== myPlayerId) return;
+    const moneyKey = myPlayerId === 1 ? 'p1Money' : 'p2Money';
+    const countKey = myPlayerId === 1 ? 'p1ItemCount' : 'p2ItemCount';
+    const oppCountKey = myPlayerId === 1 ? 'p2ItemCount' : 'p1ItemCount';
+    
+    let currentMoney = gameState[moneyKey];
+    let myCount = gameState[countKey];
+    let oppCount = gameState[oppCountKey];
+    
+    // 使用制限チェック: 相手+1まで
+    if (myCount >= oppCount + 1) {
+        alert("使用回数制限: 相手の使用数+1までしか使えません");
+        return;
+    }
+
+    let cost = 0;
+    if (itemType === 'highlow') cost = 800;
+    else if (itemType === 'target') cost = 1000;
+    else if (itemType === 'double') cost = 1500;
+
+    if (currentMoney < cost) { alert("資金不足"); return; }
+
+    currentMoney -= cost;
+    myCount++;
+    const targetNum = myPlayerId === 1 ? gameState.p2Num : gameState.p1Num;
+    let logMsg = "";
+    const updates = {};
+
+    if (itemType === 'highlow') {
+        let hl = "";
+        for(let c of targetNum) hl += (parseInt(c) >= 5 ? "H" : "L");
+        logMsg = `[ITEM] HIGH&LOW: ${hl}`;
+    } else if (itemType === 'target') {
+        const idx = Math.floor(Math.random() * 3);
+        logMsg = `[ITEM] TARGET: ${targetNum[idx]} EXISTS`;
+    } else if (itemType === 'double') {
+        logMsg = `[ITEM] DOUBLE CHARGE`;
+        // 次の自分のターンに効果発動
+        const doubleKey = myPlayerId === 1 ? 'p1Double' : 'p2Double';
+        updates[doubleKey] = 1; 
+    }
+
+    updates[moneyKey] = currentMoney;
+    updates[countKey] = myCount;
+    updates.history = [...gameState.history, { player: myPlayerId, type: 'item', msg: logMsg }];
+    
+    // アイテム使用でターン終了
+    updates.turn = myPlayerId === 1 ? 2 : 1;
+
+    updateRemoteState(updates);
+    toggleShop();
+}
+
+// UI
 function updateGameUI() {
     const turnInd = document.getElementById('turn-indicator');
     const isMyTurn = gameState.turn === myPlayerId;
+    const myMoney = myPlayerId === 1 ? gameState.p1Money : gameState.p2Money;
+    const myDouble = myPlayerId === 1 ? gameState.p1Double : gameState.p2Double;
+
+    document.getElementById('my-money-disp').innerText = "$" + myMoney;
+    document.getElementById('my-item-count').innerText = gameState[myPlayerId === 1 ? 'p1ItemCount' : 'p2ItemCount'];
+    document.getElementById('enemy-item-count').innerText = gameState[myPlayerId === 1 ? 'p2ItemCount' : 'p1ItemCount'];
     
+    // Double Indicator
+    const dInd = document.getElementById('double-mode-indicator');
+    if (myDouble > 0 && isMyTurn) {
+        dInd.classList.remove('hidden');
+        dInd.innerText = myDouble === 1 ? "DOUBLE READY (1/2)" : "DOUBLE ATTACK (2/2)";
+    } else {
+        dInd.classList.add('hidden');
+    }
+
     if (isMyTurn) {
         turnInd.innerText = "YOUR TURN";
-        turnInd.className = "text-sm font-bold text-[#00ff41] animate-pulse";
-        document.getElementById('call-display').parentElement.classList.add('border', 'border-[#00ff41]');
+        turnInd.className = "text-lg font-bold text-[#00ff41] animate-pulse border border-green-500 px-2 py-0.5 rounded bg-green-900/20";
+        document.getElementById('call-display').parentElement.classList.add('border-green-500');
     } else {
-        turnInd.innerText = "ENEMY TURN";
-        turnInd.className = "text-sm font-bold text-red-500";
-        document.getElementById('call-display').parentElement.classList.remove('border', 'border-[#00ff41]');
+        turnInd.innerText = "WAITING";
+        turnInd.className = "text-lg font-bold text-red-500 border border-red-500 px-2 py-0.5 rounded bg-red-900/20";
+        document.getElementById('call-display').parentElement.classList.remove('border-green-500');
     }
-    updateCallDisplay(); // ボタンの有効無効更新
+    updateCallDisplay();
 
-    // 履歴表示
+    // 履歴
     const myHistDiv = document.getElementById('my-history');
     const enHistDiv = document.getElementById('enemy-history');
     myHistDiv.innerHTML = '';
     enHistDiv.innerHTML = '';
 
-    // 新しい順に表示したいので逆順ループまたはflex-col-reverseなど使うが、
-    // ここでは単純に追加していく（上が古い）
-    gameState.history.forEach((h, i) => {
+    gameState.history.forEach((h) => {
         const div = document.createElement('div');
-        div.className = "flex justify-between p-2 mb-1 bg-[#001100] border border-[#003300] font-mono text-sm";
+        div.className = "p-2 mb-1 border-l-2 font-mono text-sm shadow-sm";
         
-        // EAT/BITEの色分け
-        const resClass = h.eat === 3 ? "text-red-500 font-bold" : "text-yellow-400";
-        
-        div.innerHTML = `
-            <span class="tracking-widest text-lg">${h.call}</span>
-            <span class="${resClass}">${h.eat}E - ${h.bite}B</span>
-        `;
-
-        if (h.player === myPlayerId) {
-            myHistDiv.prepend(div); // 新しいのが上
-        } else {
-            enHistDiv.prepend(div);
+        if (h.type === 'call') {
+            div.className += h.player === myPlayerId ? " bg-[#001000] border-green-800" : " bg-[#100000] border-red-800";
+            const resClass = h.eat === 3 ? "text-red-500 font-bold" : (h.eat > 0 ? "text-green-400 font-bold" : "text-yellow-400");
+            div.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <span class="tracking-widest text-lg text-white opacity-80">${h.call}</span>
+                    <span class="${resClass}">${h.eat}E - ${h.bite}B</span>
+                </div>
+            `;
+        } else if (h.type === 'item') {
+            div.className += " bg-yellow-900/20 border-yellow-500";
+            div.innerHTML = `<div class="text-yellow-500 text-[10px] font-bold tracking-widest">${h.msg}</div>`;
         }
+
+        if (h.player === myPlayerId) myHistDiv.prepend(div);
+        else enHistDiv.prepend(div);
     });
+
+    // ショップ制御
+    const shopMsg = document.getElementById('shop-msg');
+    const myCount = gameState[myPlayerId===1?'p1ItemCount':'p2ItemCount'];
+    const oppCount = gameState[myPlayerId===1?'p2ItemCount':'p1ItemCount'];
+    
+    if (!isMyTurn) {
+        shopMsg.innerText = "相手のターンです";
+        shopMsg.className = "text-[10px] text-red-500 text-center";
+        ['hl','target','double'].forEach(id => document.getElementById('btn-item-'+id).disabled = true);
+    } else if (myCount >= oppCount + 1) {
+        shopMsg.innerText = "使用制限: 相手の使用数を超過しています";
+        shopMsg.className = "text-[10px] text-red-500 text-center";
+        ['hl','target','double'].forEach(id => document.getElementById('btn-item-'+id).disabled = true);
+    } else {
+        shopMsg.innerText = "アイテム使用でターン消費";
+        shopMsg.className = "text-[10px] text-yellow-500 text-center";
+        document.getElementById('btn-item-hl').disabled = myMoney < 800;
+        document.getElementById('btn-item-target').disabled = myMoney < 1000;
+        document.getElementById('btn-item-double').disabled = myMoney < 1500;
+    }
 }
 
 function showResult() {
@@ -531,22 +738,151 @@ function showResult() {
     const title = document.getElementById('result-title');
     const sub = document.getElementById('result-sub');
     const numDisp = document.getElementById('result-number');
+    const credDisp = document.getElementById('result-credits');
     
-    // 相手の数字を表示
     const enemyNum = myPlayerId === 1 ? gameState.p2Num : gameState.p1Num;
+    const finalMoney = myPlayerId === 1 ? gameState.p1Money : gameState.p2Money;
+    
     numDisp.innerText = enemyNum;
 
     if (isWin) {
         title.innerText = "VICTORY";
-        title.className = "text-6xl font-bold mb-4 text-[#00ff41] glitch-text";
-        sub.innerText = "TARGET HACKED SUCCESSFULLY";
-        sub.className = "mb-8 text-xl text-[#00ff41]";
+        title.className = "text-7xl font-black mb-2 text-[#00ff41] italic glitch-text";
+        sub.innerText = "TARGET DESTROYED";
+        sub.className = "mb-8 text-xl tracking-widest text-[#00ff41]";
+        
+        // カウントアップ演出
+        animateValue(credDisp, 0, finalMoney, 2000);
     } else {
         title.innerText = "DEFEAT";
-        title.className = "text-6xl font-bold mb-4 text-red-600 glitch-text";
-        sub.innerText = "SYSTEM CRITICAL FAILURE";
-        sub.className = "mb-8 text-xl text-red-600";
+        title.className = "text-7xl font-black mb-2 text-red-600 italic glitch-text";
+        sub.innerText = "SYSTEM FAILURE";
+        sub.className = "mb-8 text-xl tracking-widest text-red-600";
+        credDisp.innerText = "0";
     }
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
+}
+
+// --- CPU Logic ---
+function startCpuGame() {
+    myPlayerId = 1;
+    gameState = getInitialState();
+    
+    // CPU Setup
+    cpuSecret = generateSecret();
+    cpuCandidates = generateAllCandidates();
+    cpuMoney = 3000;
+    cpuItemCount = 0;
+    cpuDoubleActive = 0;
+    
+    showScreen('setup');
+}
+
+function generateSecret() {
+    let digits = [0,1,2,3,4,5,6,7,8,9];
+    let res = "";
+    for(let i=0; i<3; i++) {
+        let idx = Math.floor(Math.random() * digits.length);
+        res += digits[idx];
+        digits.splice(idx, 1);
+    }
+    return res;
+}
+
+function generateAllCandidates() {
+    let list = [];
+    for(let i=0; i<1000; i++) {
+        let s = i.toString().padStart(3, '0');
+        if(s[0]!=s[1] && s[1]!=s[2] && s[0]!=s[2]) list.push(s);
+    }
+    return list;
+}
+
+function cpuTurnProcess() {
+    // 思考
+    const canUseItem = (cpuItemCount < gameState.p1ItemCount + 1);
+    const money = gameState.p2Money;
+    
+    // 確率でアイテム使用 (劣勢時や金がある時)
+    if (canUseItem && Math.random() < 0.3 && money >= 800) {
+        // アイテム使用
+        let item = '';
+        if (money >= 1500 && Math.random() < 0.3) item = 'double';
+        else if (money >= 1000 && Math.random() < 0.4) item = 'target';
+        else item = 'highlow';
+        
+        cpuBuyItem(item);
+    } else {
+        // コール
+        // 候補からランダムに選ぶ
+        const idx = Math.floor(Math.random() * cpuCandidates.length);
+        const callNum = cpuCandidates[idx];
+        
+        processCall(2, callNum, gameState.p1Num);
+        
+        // 候補を絞り込む
+        const lastHist = gameState.history[gameState.history.length-1];
+        filterCpuCandidates(lastHist.call, lastHist.eat, lastHist.bite);
+    }
+}
+
+function filterCpuCandidates(call, eat, bite) {
+    cpuCandidates = cpuCandidates.filter(cand => {
+        let e = 0, b = 0;
+        for(let i=0; i<3; i++) {
+            if(cand[i]===call[i]) e++;
+            else if(call.includes(cand[i])) b++;
+        }
+        return e === eat && b === bite;
+    });
+}
+
+function cpuBuyItem(type) {
+    let cost = 0;
+    if (type === 'highlow') cost = 800;
+    else if (type === 'target') cost = 1000;
+    else if (type === 'double') cost = 1500;
+    
+    gameState.p2Money -= cost;
+    gameState.p2ItemCount++;
+    
+    let logMsg = "";
+    if (type === 'highlow') {
+        let hl = "";
+        for(let c of gameState.p1Num) hl += (parseInt(c) >= 5 ? "H" : "L");
+        logMsg = `[ITEM] HIGH&LOW: ${hl}`;
+    } else if (type === 'target') {
+        const val = gameState.p1Num[Math.floor(Math.random()*3)];
+        logMsg = `[ITEM] TARGET: ${val} EXISTS`;
+        // CPUはこれで候補を絞る
+        cpuCandidates = cpuCandidates.filter(c => c.includes(val));
+    } else if (type === 'double') {
+        logMsg = `[ITEM] DOUBLE CHARGE`;
+        gameState.p2Double = 1;
+    }
+    
+    const newHist = [...gameState.history, { player: 2, type: 'item', msg: logMsg }];
+    
+    // CPUターン終了
+    updateRemoteState({
+        p2Money: gameState.p2Money,
+        p2ItemCount: gameState.p2ItemCount,
+        p2Double: gameState.p2Double,
+        history: newHist,
+        turn: 1
+    });
 }
 
 // 開始
