@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUMER0N ONLINE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK (v8 互換モード) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap');
+
+        body {
+            background-color: #000000;
+            color: #00ff41;
+            font-family: 'Share Tech Mono', 'Zen Kaku Gothic New', monospace;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* サイバーパンクな背景 */
+        .bg-cyber {
+            background-image: 
+                linear-gradient(rgba(0, 20, 0, 0.9), rgba(0, 10, 0, 0.95)),
+                repeating-linear-gradient(0deg, transparent, transparent 1px, #003300 1px, #003300 2px);
+            background-size: 100% 100%, 100% 4px;
+        }
+
+        /* ネオンボタン */
+        .btn-neon {
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            transition: all 0.2s;
+            text-shadow: 0 0 5px #00ff41;
+            box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+        }
+        .btn-neon:hover:not(:disabled) {
+            background: #00ff41;
+            color: #000;
+            box-shadow: 0 0 20px #00ff41;
+        }
+        .btn-neon:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        .btn-neon:disabled {
+            border-color: #333;
+            color: #333;
+            background: transparent;
+            text-shadow: none;
+            box-shadow: none;
+        }
+
+        /* 入力ディスプレイ */
+        .display-box {
+            background: #001100;
+            border: 1px solid #004400;
+            box-shadow: inset 0 0 10px #002200;
+            text-shadow: 0 0 10px #00ff41;
+        }
+
+        /* 履歴テーブル */
+        .history-row {
+            border-bottom: 1px solid #003300;
+        }
+        .history-row:last-child {
+            border-bottom: none;
+        }
+
+        /* グリッチエフェクト風テキスト */
+        .glitch-text {
+            position: relative;
+        }
+        
+        /* オーバーレイ */
+        #overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 50;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        input { 
+            background: #001100; 
+            border: 1px solid #00ff41; 
+            color: #00ff41; 
+            padding: 10px; 
+            text-align: center; 
+            font-family: 'Share Tech Mono';
+            outline: none;
+        }
+        input::placeholder { color: #004400; }
+        
+        /* スクロールバー */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #001100; }
+        ::-webkit-scrollbar-thumb { background: #004400; }
+    </style>
+</head>
+<body class="h-screen w-full flex flex-col bg-cyber">
+
+    <!-- オーバーレイ群 -->
+    <div id="overlay">
+        <h1 class="text-5xl font-bold mb-2 tracking-widest glitch-text" style="text-shadow: 2px 2px #003300;">NUMER0N</h1>
+        <p class="text-xs mb-8 tracking-[0.5em] opacity-70">ONLINE TACTICAL GAME</p>
+        
+        <!-- ロビー画面 -->
+        <div id="screen-lobby" class="text-center w-full max-w-sm px-4">
+            <div class="mb-6">
+                <p class="mb-2 text-sm opacity-80">ACCESS CODE (ROOM ID)</p>
+                <input type="text" id="room-id-input" placeholder="ROOM123" class="w-full mb-4 text-xl uppercase tracking-widest">
+            </div>
+            
+            <div id="firebase-warning" class="hidden text-red-500 text-xs mb-4 border border-red-900 p-2">
+                ⚠️ DATABASE ERROR: Please check Firestore settings.
+            </div>
+
+            <button onclick="tryJoinRoom()" id="btn-join" class="btn-neon w-full py-4 font-bold tracking-widest">
+                CONNECT
+            </button>
+        </div>
+
+        <!-- 数字設定画面 -->
+        <div id="screen-setup" class="text-center hidden w-full max-w-sm px-4">
+            <h2 class="text-2xl mb-4 text-white">SET YOUR NUMBER</h2>
+            <p class="text-xs mb-4 text-green-400">3桁の数字を決めてください (重複なし)</p>
+            
+            <div class="display-box text-4xl py-4 mb-6 tracking-[0.5em] h-20 flex items-center justify-center" id="setup-display">
+                ---
+            </div>
+            
+            <!-- テンキー (セットアップ用) -->
+            <div class="grid grid-cols-5 gap-2 mb-4 max-w-xs mx-auto">
+                <button class="btn-neon py-3" onclick="inputSetup(0)">0</button>
+                <button class="btn-neon py-3" onclick="inputSetup(1)">1</button>
+                <button class="btn-neon py-3" onclick="inputSetup(2)">2</button>
+                <button class="btn-neon py-3" onclick="inputSetup(3)">3</button>
+                <button class="btn-neon py-3" onclick="inputSetup(4)">4</button>
+                <button class="btn-neon py-3" onclick="inputSetup(5)">5</button>
+                <button class="btn-neon py-3" onclick="inputSetup(6)">6</button>
+                <button class="btn-neon py-3" onclick="inputSetup(7)">7</button>
+                <button class="btn-neon py-3" onclick="inputSetup(8)">8</button>
+                <button class="btn-neon py-3" onclick="inputSetup(9)">9</button>
+            </div>
+            <div class="flex gap-2 justify-center mb-6">
+                <button class="btn-neon px-6 py-2 text-sm" onclick="clearSetup()">CLR</button>
+                <button class="btn-neon px-6 py-2 text-sm font-bold" onclick="confirmSetup()" id="btn-setup-ok" disabled>OK</button>
+            </div>
+        </div>
+
+        <!-- 待機画面 -->
+        <div id="screen-wait" class="text-center hidden">
+            <div class="animate-pulse text-6xl mb-4">...</div>
+            <h2 class="text-xl mb-2">WAITING FOR OPPONENT</h2>
+            <p class="text-sm opacity-60">相手の準備を待っています</p>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="screen-result" class="text-center hidden">
+            <h2 id="result-title" class="text-5xl font-bold mb-4">WIN</h2>
+            <p id="result-sub" class="mb-8 text-xl">TARGET DESTROYED</p>
+            <p class="mb-2 text-sm opacity-70">OPPONENT'S NUMBER</p>
+            <div id="result-number" class="text-4xl font-bold text-red-500 mb-8 tracking-widest">---</div>
+            <button onclick="location.reload()" class="btn-neon px-10 py-3 font-bold">
+                DISCONNECT
+            </button>
+        </div>
+    </div>
+
+    <!-- メインゲーム画面 -->
+    <div id="game-ui" class="flex-1 flex flex-col max-w-md mx-auto w-full relative h-full">
+        
+        <!-- ヘッダー情報 -->
+        <div class="h-16 border-b border-[#003300] flex justify-between items-center px-4 bg-[#001100]">
+            <div>
+                <div class="text-[10px] opacity-50">MY NUMBER</div>
+                <div class="text-xl font-bold tracking-widest text-green-300" id="my-number-disp">***</div>
+            </div>
+            <div class="text-center">
+                <div class="text-[10px] opacity-50">ROOM</div>
+                <div class="text-xs" id="disp-room-id">---</div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] opacity-50">TURN</div>
+                <div class="text-sm font-bold text-yellow-400" id="turn-indicator">WAITING</div>
+            </div>
+        </div>
+
+        <!-- メインエリア -->
+        <div class="flex-1 flex flex-col relative overflow-hidden">
+            
+            <!-- 履歴エリア (スクロール) -->
+            <div class="flex-1 overflow-y-auto p-2 flex gap-2 text-xs">
+                <!-- 自分の履歴 -->
+                <div class="flex-1 border border-[#003300] bg-[#000500]">
+                    <div class="p-1 text-center bg-[#002200] border-b border-[#003300] text-gray-400">YOUR ATTACK</div>
+                    <div id="my-history" class="p-1">
+                        <!-- JSで追加 -->
+                    </div>
+                </div>
+                <!-- 相手の履歴 -->
+                <div class="flex-1 border border-[#003300] bg-[#000500]">
+                    <div class="p-1 text-center bg-[#002200] border-b border-[#003300] text-red-900">ENEMY ATTACK</div>
+                    <div id="enemy-history" class="p-1">
+                        <!-- JSで追加 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 入力エリア -->
+            <div class="h-auto bg-[#000800] border-t border-[#003300] p-4 pb-8">
+                
+                <!-- コール表示 -->
+                <div class="flex justify-center mb-4">
+                    <div class="display-box w-full max-w-[200px] h-14 flex items-center justify-center text-4xl tracking-[0.5em]" id="call-display">
+                        
+                    </div>
+                </div>
+
+                <!-- テンキー (ゲーム用) -->
+                <div class="grid grid-cols-5 gap-2 max-w-sm mx-auto mb-4">
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(0)">0</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(1)">1</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(2)">2</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(3)">3</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(4)">4</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(5)">5</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(6)">6</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(7)">7</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(8)">8</button>
+                    <button class="btn-neon py-3 text-lg font-bold" onclick="inputCall(9)">9</button>
+                </div>
+
+                <!-- アクションボタン -->
+                <div class="flex gap-4 justify-center max-w-sm mx-auto">
+                    <button class="btn-neon flex-1 py-3 text-sm" onclick="clearCall()">CLEAR</button>
+                    <button class="btn-neon flex-[2] py-3 text-xl font-bold" id="btn-call" onclick="submitCall()" disabled>CALL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+/**
+ * FIREBASE CONFIGURATION
+ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBTpDao1xXCJt5XM1-qv3QsNw8HOPy-bUw",
+  authDomain: "numeron-deeb5.firebaseapp.com",
+  projectId: "numeron-deeb5",
+  storageBucket: "numeron-deeb5.firebasestorage.app",
+  messagingSenderId: "752649306956",
+  appId: "1:752649306956:web:76706e04aa93ccd5c145e9"
+};
+
+// グローバル変数
+let db;
+let myPlayerId = null; // 1 or 2
+let currentRoomId = null;
+let unsubscribe = null;
+let mySecretNumber = "";
+let currentInput = "";
+let setupInput = "";
+
+// ゲーム状態
+let gameState = {
+    status: 'waiting', // waiting, setup, playing, finished
+    turn: 1,
+    p1Num: null,
+    p2Num: null,
+    history: [], // { player: 1, call: "123", eat: 0, bite: 1 }
+    winner: null
+};
+
+// 初期化
+function initApp() {
+    try {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.firestore();
+        console.log("Firebase Initialized");
+    } catch (e) {
+        console.error(e);
+        document.getElementById('firebase-warning').classList.remove('hidden');
+    }
+}
+
+// 画面遷移
+function showScreen(id) {
+    ['screen-lobby', 'screen-setup', 'screen-wait', 'screen-result'].forEach(s => {
+        document.getElementById(s).classList.add('hidden');
+    });
+    const target = document.getElementById('screen-' + id);
+    if(target) target.classList.remove('hidden');
+    
+    const overlay = document.getElementById('overlay');
+    if (id === 'none') {
+        overlay.style.display = 'none';
+    } else {
+        overlay.style.display = 'flex';
+    }
+}
+
+// マッチング
+async function tryJoinRoom() {
+    const roomInput = document.getElementById('room-id-input').value.toUpperCase();
+    if (!roomInput) return;
+    if (!db) return;
+    
+    currentRoomId = roomInput;
+    document.getElementById('disp-room-id').innerText = currentRoomId;
+    const btn = document.getElementById('btn-join');
+    btn.disabled = true;
+    btn.innerText = "CONNECTING...";
+
+    const docRef = db.collection('numeron_rooms').doc(currentRoomId);
+
+    try {
+        await db.runTransaction(async (transaction) => {
+            const doc = await transaction.get(docRef);
+
+            if (!doc.exists) {
+                // ホスト(P1)
+                myPlayerId = 1;
+                transaction.set(docRef, {
+                    status: 'setup',
+                    turn: 1,
+                    p1Num: null,
+                    p2Num: null,
+                    history: [],
+                    winner: null,
+                    updatedAt: Date.now()
+                });
+            } else {
+                const data = doc.data();
+                if (data.status === 'setup' && !data.p2Num) {
+                    // ゲスト(P2) ※まだ数字未設定の状態なら入れる
+                    myPlayerId = 2;
+                } else if (data.status === 'waiting') {
+                     // まだ誰もいない判定等の細かい制御は省略、簡易的にP2とする
+                     myPlayerId = 2;
+                } else {
+                    // 既に埋まっている場合も簡易的にP2として入る（再接続考慮）
+                    // 本格的にはメンバー管理が必要だが今回は簡易版
+                    myPlayerId = 2;
+                }
+            }
+        });
+
+        // 数字設定画面へ
+        showScreen('setup');
+        startListening();
+
+    } catch (error) {
+        console.error(error);
+        alert("接続エラー");
+        btn.disabled = false;
+        btn.innerText = "CONNECT";
+    }
+}
+
+function startListening() {
+    unsubscribe = db.collection('numeron_rooms').doc(currentRoomId)
+        .onSnapshot((doc) => {
+            if (doc.exists) {
+                const data = doc.data();
+                gameState = data;
+                onGameStateChanged();
+            }
+        });
+}
+
+// 状態変化時の処理
+function onGameStateChanged() {
+    if (gameState.status === 'setup') {
+        // 自分が数字を送信済みなら待機画面
+        if (myPlayerId === 1 && gameState.p1Num) showScreen('wait');
+        else if (myPlayerId === 2 && gameState.p2Num) showScreen('wait');
+        else showScreen('setup');
+
+        // 両者設定完了したらゲーム開始へ
+        if (gameState.p1Num && gameState.p2Num) {
+            if (myPlayerId === 1) {
+                db.collection('numeron_rooms').doc(currentRoomId).update({
+                    status: 'playing'
+                });
+            }
+        }
+    } else if (gameState.status === 'playing') {
+        showScreen('none');
+        updateGameUI();
+    } else if (gameState.status === 'finished') {
+        showResult();
+    }
+}
+
+// 数字設定ロジック
+function inputSetup(num) {
+    if (setupInput.length >= 3) return;
+    if (setupInput.includes(num.toString())) return; // 重復なし
+    setupInput += num;
+    updateSetupDisplay();
+}
+function clearSetup() {
+    setupInput = "";
+    updateSetupDisplay();
+}
+function updateSetupDisplay() {
+    const disp = document.getElementById('setup-display');
+    disp.innerText = setupInput.padEnd(3, '-');
+    document.getElementById('btn-setup-ok').disabled = setupInput.length !== 3;
+}
+async function confirmSetup() {
+    mySecretNumber = setupInput;
+    document.getElementById('my-number-disp').innerText = mySecretNumber;
+    
+    const updateData = {};
+    if (myPlayerId === 1) updateData.p1Num = mySecretNumber;
+    else updateData.p2Num = mySecretNumber;
+    
+    await db.collection('numeron_rooms').doc(currentRoomId).update(updateData);
+}
+
+// ゲームプレイロジック
+function inputCall(num) {
+    if (currentInput.length >= 3) return;
+    if (currentInput.includes(num.toString())) return;
+    currentInput += num;
+    updateCallDisplay();
+}
+function clearCall() {
+    currentInput = "";
+    updateCallDisplay();
+}
+function updateCallDisplay() {
+    document.getElementById('call-display').innerText = currentInput;
+    const isMyTurn = gameState.turn === myPlayerId;
+    document.getElementById('btn-call').disabled = !(currentInput.length === 3 && isMyTurn);
+}
+
+async function submitCall() {
+    if (gameState.turn !== myPlayerId) return;
+
+    // 判定ロジック
+    const targetNum = myPlayerId === 1 ? gameState.p2Num : gameState.p1Num;
+    const callNum = currentInput;
+    
+    let eat = 0;
+    let bite = 0;
+
+    for (let i = 0; i < 3; i++) {
+        if (callNum[i] === targetNum[i]) {
+            eat++;
+        } else if (targetNum.includes(callNum[i])) {
+            bite++;
+        }
+    }
+
+    // データ更新
+    const newHistory = [...gameState.history, {
+        player: myPlayerId,
+        call: callNum,
+        eat: eat,
+        bite: bite
+    }];
+    
+    const updates = {
+        history: newHistory,
+        turn: myPlayerId === 1 ? 2 : 1
+    };
+
+    if (eat === 3) {
+        updates.status = 'finished';
+        updates.winner = myPlayerId;
+    }
+
+    currentInput = "";
+    updateCallDisplay();
+
+    await db.collection('numeron_rooms').doc(currentRoomId).update(updates);
+}
+
+// UI更新
+function updateGameUI() {
+    const turnInd = document.getElementById('turn-indicator');
+    const isMyTurn = gameState.turn === myPlayerId;
+    
+    if (isMyTurn) {
+        turnInd.innerText = "YOUR TURN";
+        turnInd.className = "text-sm font-bold text-[#00ff41] animate-pulse";
+        document.getElementById('call-display').parentElement.classList.add('border', 'border-[#00ff41]');
+    } else {
+        turnInd.innerText = "ENEMY TURN";
+        turnInd.className = "text-sm font-bold text-red-500";
+        document.getElementById('call-display').parentElement.classList.remove('border', 'border-[#00ff41]');
+    }
+    updateCallDisplay(); // ボタンの有効無効更新
+
+    // 履歴表示
+    const myHistDiv = document.getElementById('my-history');
+    const enHistDiv = document.getElementById('enemy-history');
+    myHistDiv.innerHTML = '';
+    enHistDiv.innerHTML = '';
+
+    // 新しい順に表示したいので逆順ループまたはflex-col-reverseなど使うが、
+    // ここでは単純に追加していく（上が古い）
+    gameState.history.forEach((h, i) => {
+        const div = document.createElement('div');
+        div.className = "flex justify-between p-2 mb-1 bg-[#001100] border border-[#003300] font-mono text-sm";
+        
+        // EAT/BITEの色分け
+        const resClass = h.eat === 3 ? "text-red-500 font-bold" : "text-yellow-400";
+        
+        div.innerHTML = `
+            <span class="tracking-widest text-lg">${h.call}</span>
+            <span class="${resClass}">${h.eat}E - ${h.bite}B</span>
+        `;
+
+        if (h.player === myPlayerId) {
+            myHistDiv.prepend(div); // 新しいのが上
+        } else {
+            enHistDiv.prepend(div);
+        }
+    });
+}
+
+function showResult() {
+    showScreen('result');
+    const isWin = gameState.winner === myPlayerId;
+    const title = document.getElementById('result-title');
+    const sub = document.getElementById('result-sub');
+    const numDisp = document.getElementById('result-number');
+    
+    // 相手の数字を表示
+    const enemyNum = myPlayerId === 1 ? gameState.p2Num : gameState.p1Num;
+    numDisp.innerText = enemyNum;
+
+    if (isWin) {
+        title.innerText = "VICTORY";
+        title.className = "text-6xl font-bold mb-4 text-[#00ff41] glitch-text";
+        sub.innerText = "TARGET HACKED SUCCESSFULLY";
+        sub.className = "mb-8 text-xl text-[#00ff41]";
+    } else {
+        title.innerText = "DEFEAT";
+        title.className = "text-6xl font-bold mb-4 text-red-600 glitch-text";
+        sub.innerText = "SYSTEM CRITICAL FAILURE";
+        sub.className = "mb-8 text-xl text-red-600";
+    }
+}
+
+// 開始
+initApp();
+</script>
+</body>
+</html>
