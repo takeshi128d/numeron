@@ -84,6 +84,20 @@
             box-shadow: none;
         }
 
+        /* シアンボタン（分析用） */
+        .btn-cyan {
+            border: 1px solid #00e5ff;
+            color: #00e5ff;
+            background: rgba(0, 229, 255, 0.1);
+            text-shadow: 0 0 5px #00e5ff;
+            box-shadow: 0 0 5px rgba(0, 229, 255, 0.3);
+        }
+        .btn-cyan:hover {
+            background: #00e5ff;
+            color: #000;
+            box-shadow: 0 0 20px #00e5ff;
+        }
+
         .display-box {
             background: #001100;
             border: 1px solid #004400;
@@ -255,6 +269,18 @@
                 </div>
             </div>
 
+            <!-- 分析パネル（サジェスト） -->
+            <div id="analysis-panel" class="hidden absolute bottom-[300px] left-2 right-2 bg-[#001818] border border-cyan-600 p-4 z-30 rounded shadow-[0_0_50px_rgba(0,255,255,0.2)] flex flex-col max-h-[50%]">
+                <div class="flex justify-between items-center mb-2 border-b border-cyan-900 pb-2">
+                    <h3 class="text-cyan-400 font-bold tracking-widest">AI ANALYSIS</h3>
+                    <button onclick="toggleAnalysis()" class="text-xs text-cyan-600 border border-cyan-900 px-2">CLOSE</button>
+                </div>
+                <p class="text-[10px] text-gray-400 mb-2">POSSIBLE CANDIDATES BASED ON LOGS:</p>
+                <div id="candidates-list" class="grid grid-cols-5 gap-2 overflow-y-auto flex-1 p-1">
+                    <!-- JSで生成 -->
+                </div>
+            </div>
+
             <!-- ショップパネル -->
             <div id="shop-panel" class="hidden absolute bottom-[300px] left-2 right-2 bg-[#0a0a00] border border-yellow-600 p-4 z-20 rounded shadow-[0_0_50px_rgba(255,200,0,0.2)]">
                 <div class="flex justify-between items-center mb-4 border-b border-yellow-900 pb-2">
@@ -291,9 +317,14 @@
                 <button onclick="toggleShop()" class="absolute -top-10 right-4 bg-yellow-900/80 border border-yellow-500 text-yellow-400 text-xs px-4 py-2 rounded-t font-bold tracking-widest hover:bg-yellow-800 transition">
                     ITEM SHOP ▼
                 </button>
+
+                <!-- 分析ボタン -->
+                <button onclick="toggleAnalysis()" class="absolute -top-10 left-4 bg-cyan-900/80 border border-cyan-500 text-cyan-400 text-xs px-4 py-2 rounded-t font-bold tracking-widest hover:bg-cyan-800 transition" id="btn-analysis">
+                    AI ANALYSIS (---)
+                </button>
                 
-                <div id="double-mode-indicator" class="hidden absolute -top-8 left-4 text-red-500 font-bold text-xs bg-red-900/20 px-2 py-1 border border-red-500 animate-pulse">
-                    DOUBLE ATTACK ACTIVE
+                <div id="double-mode-indicator" class="hidden absolute -top-8 left-1/2 transform -translate-x-1/2 text-red-500 font-bold text-xs bg-red-900/20 px-2 py-1 border border-red-500 animate-pulse">
+                    DOUBLE ACTIVE
                 </div>
 
                 <!-- コール表示 -->
@@ -351,6 +382,7 @@ let unsubscribe = null;
 let mySecretNumber = "";
 let currentInput = "";
 let setupInput = "";
+let playerCandidates = []; // プレイヤー用の候補リスト
 
 // CPU対戦用メモリ
 let cpuSecret = "";
@@ -400,6 +432,9 @@ function showScreen(id) {
     if (id === 'game') {
         document.getElementById('game-ui').classList.remove('hidden');
         document.getElementById('overlay').style.display = 'none';
+        // ゲーム開始時に候補リセット
+        playerCandidates = generateAllCandidates();
+        updateAnalysisButton();
     } else {
         const target = document.getElementById('screen-' + id);
         if(target) target.classList.remove('hidden');
@@ -487,6 +522,7 @@ function onGameStateChanged() {
         }
     } else if (gameState.status === 'playing') {
         showScreen('game');
+        calculatePlayerCandidates(); // 履歴から候補を再計算
         updateGameUI();
     } else if (gameState.status === 'finished') {
         showResult();
@@ -568,34 +604,23 @@ function processCall(player, callNum, targetNum) {
     } else {
         // ターン制御
         if (doubleState === 2) {
-            // ダブル2回目終了 -> ターン交代
             updates[doubleKey] = 0;
             updates.turn = player === 1 ? 2 : 1;
         } else if (doubleState === 1) {
-             // ダブル発動待機中 -> 2回行動開始
-             // しかしアイテム使用でターン消費するため、ここに来るのは
-             // アイテム使用後の次の自分のターンの1手目。
-             // 1手終わったので状態を2(残り1回)にする。
-             // ターンは交代しない。
              updates[doubleKey] = 2;
-             // turnはそのまま
         } else {
-            // 通常 -> ターン交代
             updates.turn = player === 1 ? 2 : 1;
         }
     }
-    
-    // Check next player's double status to activate it?
-    // No, logic handled when they play.
-    
-    // If next player has Double=1 (active from item), they start their turn.
-    // Nothing special needed here, just UI indication.
     
     updateRemoteState(updates);
 }
 
 // Shop
-function toggleShop() { document.getElementById('shop-panel').classList.toggle('hidden'); }
+function toggleShop() { 
+    document.getElementById('shop-panel').classList.toggle('hidden'); 
+    document.getElementById('analysis-panel').classList.add('hidden'); // 他のパネル閉じる
+}
 
 function buyItem(itemType) {
     if (gameState.turn !== myPlayerId) return;
@@ -607,7 +632,6 @@ function buyItem(itemType) {
     let myCount = gameState[countKey];
     let oppCount = gameState[oppCountKey];
     
-    // 使用制限チェック: 相手+1まで
     if (myCount >= oppCount + 1) {
         alert("使用回数制限: 相手の使用数+1までしか使えません");
         return;
@@ -635,7 +659,6 @@ function buyItem(itemType) {
         logMsg = `[ITEM] TARGET: ${targetNum[idx]} EXISTS`;
     } else if (itemType === 'double') {
         logMsg = `[ITEM] DOUBLE CHARGE`;
-        // 次の自分のターンに効果発動
         const doubleKey = myPlayerId === 1 ? 'p1Double' : 'p2Double';
         updates[doubleKey] = 1; 
     }
@@ -644,11 +667,89 @@ function buyItem(itemType) {
     updates[countKey] = myCount;
     updates.history = [...gameState.history, { player: myPlayerId, type: 'item', msg: logMsg }];
     
-    // アイテム使用でターン終了
     updates.turn = myPlayerId === 1 ? 2 : 1;
 
     updateRemoteState(updates);
     toggleShop();
+}
+
+// Analysis (Player)
+function toggleAnalysis() {
+    document.getElementById('analysis-panel').classList.toggle('hidden');
+    document.getElementById('shop-panel').classList.add('hidden');
+    
+    // リスト描画
+    const div = document.getElementById('candidates-list');
+    div.innerHTML = '';
+    
+    if (playerCandidates.length === 0) {
+        div.innerHTML = '<div class="col-span-5 text-center text-red-500 text-xs py-4">NO CANDIDATES</div>';
+    } else {
+        // 全件表示すると重い場合があるので最大100件など制限しても良いが、1000件程度ならDOMでもいける
+        // ここでは全件出す
+        playerCandidates.forEach(cand => {
+            const btn = document.createElement('button');
+            btn.className = "text-cyan-400 border border-cyan-900 bg-cyan-900/20 text-sm py-1 hover:bg-cyan-600 hover:text-black";
+            btn.innerText = cand;
+            btn.onclick = () => {
+                currentInput = cand;
+                updateCallDisplay();
+                toggleAnalysis();
+            };
+            div.appendChild(btn);
+        });
+    }
+}
+
+function calculatePlayerCandidates() {
+    // 全候補からスタート
+    let cands = generateAllCandidates();
+    
+    // 自分の履歴だけを抽出して絞り込む
+    const myLogs = gameState.history.filter(h => h.player === myPlayerId);
+    
+    myLogs.forEach(h => {
+        if (h.type === 'call') {
+            cands = cands.filter(cand => {
+                let e = 0, b = 0;
+                for(let i=0; i<3; i++) {
+                    if(cand[i] === h.call[i]) e++;
+                    else if(h.call.includes(cand[i])) b++;
+                }
+                return e === h.eat && b === h.bite;
+            });
+        } else if (h.type === 'item') {
+            // アイテム解析
+            // HIGH&LOW: HLL -> 5-9, 0-4, 0-4
+            const hlMatch = h.msg.match(/HIGH&LOW: ([HL]{3})/);
+            if (hlMatch) {
+                const hl = hlMatch[1];
+                cands = cands.filter(cand => {
+                    for(let i=0; i<3; i++) {
+                        const n = parseInt(cand[i]);
+                        const isHigh = n >= 5;
+                        if ((hl[i] === 'H' && !isHigh) || (hl[i] === 'L' && isHigh)) return false;
+                    }
+                    return true;
+                });
+            }
+            
+            // TARGET: 5 EXISTS -> 5が含まれる
+            const tgMatch = h.msg.match(/TARGET: (\d) EXISTS/);
+            if (tgMatch) {
+                const targetVal = tgMatch[1];
+                cands = cands.filter(cand => cand.includes(targetVal));
+            }
+        }
+    });
+    
+    playerCandidates = cands;
+    updateAnalysisButton();
+}
+
+function updateAnalysisButton() {
+    const btn = document.getElementById('btn-analysis');
+    btn.innerText = `AI ANALYSIS (${playerCandidates.length})`;
 }
 
 // UI
